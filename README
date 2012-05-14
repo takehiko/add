@@ -1,0 +1,8 @@
+アレイ図や，デカノミアルの画像を生成します．
+プログラムはRubyで記述しています．
+実行には，Rubyの処理系のほか，ImageMagickのconvertコマンドが必要です．
+
+This program can make images of decanomials and (1- or 2-dimensional)
+arrays.
+It is a Ruby script. Please have ruby command and convert command
+of ImageMagick ready to run it.
