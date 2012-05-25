@@ -75,15 +75,17 @@ module Add
             end
             param[:dot_fill] = :none
             param[:dot_strokewidth] = @h[:dot_side] * 0.1 unless @h.key?(:dot_strokewidth)
-            param[:dot_shape] = (@h[:dot_shape] == :ring) ? :circle : :rectangle
+            param[:dot_shape] = (@h[:dot_shape] == :ring) ? :circle : :square
+          elsif @h[:dot_shape] == :rectangle
+            @h[:dot_shape] = :square
           end
           @box_a << param
-          x += @h[:dot_side] * col + @h[:dot_margin] * (col - 1) + @h[:box_margin]
+          x += @h[:dot_side] * col + @h[:dot_margin] * (col - 1) + @h[:geo_margin]
         end
-        y += @h[:dot_side] * row + @h[:dot_margin] * (row - 1) + @h[:box_margin]
+        y += @h[:dot_side] * row + @h[:dot_margin] * (row - 1) + @h[:geo_margin]
       end
-      image_width = x - @h[:box_margin] + @h[:set_margin]
-      image_height = y - @h[:box_margin] + @h[:set_margin]
+      image_width = x - @h[:geo_margin] + @h[:set_margin]
+      image_height = y - @h[:geo_margin] + @h[:set_margin]
 
       " -size #{image_width}x#{image_height} xc:#{@h[:image_bg]}"
     end
@@ -111,14 +113,14 @@ module Add
         box.each_key do |key|
           @h[key] = box[key]
         end
-        @command << Add::Drawer::Box.new(@h).to_command
+        @command << Add::Drawer::Geo.new(@h).to_command
       end
       create
     end
   end
 
   module Drawer
-    class Box
+    class Geo
       def initialize(h)
         @h = h
       end
@@ -144,7 +146,7 @@ module Add
               x_o = @h[:dot_side] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * j
               y_o = @h[:dot_side] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * i
               r = @h[:dot_side] * 0.5
-              if @h[:dot_stroke] != :none
+              if @h[:dot_stroke] != :none && !@h[:dot_stroke_unite]
                 r -= @h[:dot_strokewidth] * 0.5
               end
               x_to = x_o + r
@@ -152,14 +154,14 @@ module Add
               command += " circle #{x_o},#{y_o} #{x_to},#{y_to}"
             end
           end
-        elsif @h[:dot_shape] == :rectangle
+        elsif @h[:dot_shape] == :square
           @h[:col].times do |j|
             @h[:row].times do |i|
               x_1 = @h[:dot_margin] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * j
               y_1 = @h[:dot_margin] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * i
               x_2 = x_1 + @h[:dot_side] - @h[:dot_margin]
               y_2 = y_1 + @h[:dot_side] - @h[:dot_margin]
-              if @h[:dot_stroke] != :none
+              if @h[:dot_stroke] != :none && !@h[:dot_stroke_unite]
                 swh = @h[:dot_strokewidth] * 0.5
                 x_1 += swh
                 y_1 += swh
@@ -186,8 +188,9 @@ module Add
         :dot_shape => :circle,     # 「1個」の形状
                                    #   :circle（塗りつぶす円）
                                    #   :ring（塗りつぶさない円）
-                                   #   :rectangle（塗りつぶす長方形）
-                                   #   :box（塗りつぶさない長方形）
+                                   #   :square（塗りつぶす正方形）
+                                   #   :box（塗りつぶさない正方形）
+                                   #   :rectangle（:squareと同じ; 廃止予定）
         :dot_fill => :default,     # 「1個」の塗りつぶし色
                                    #   文字列（色名）
                                    #   :none（塗りつぶさない）
@@ -196,8 +199,10 @@ module Add
                                    #   :by_row（行数+テーブル）
                                    #   :by_col（列数+テーブル）
         :dot_stroke => :none,      # 「1個」のストローク色．値は:dot_fillと同じ
+        # :dot_strokewidth => 1,   # 「1個」のストローク太さ
+        :dot_stroke_unite => true, # 隣接する各ストロークを合体させるならtrue
         :dot_margin => 0,          # 「1個」の間の余白(幅・高さ共通)
-        :box_margin => 5,          # 「一つのアレイ図」の間の余白(幅・高さ共通)
+        :geo_margin => 5,          # 「一つのアレイ図」の間の余白(幅・高さ共通)
         :set_margin => 2,          # 全体図の余白(幅・高さ共通)
 #        :unit_draw => false,       # 「一つ分の大きさ」描画の有無
 #        :unit_color => :black,     # 「一つ分の大きさ」のストローク色
@@ -221,8 +226,23 @@ if __FILE__ == $0
   h[:dot_shape] = :ring
   Add::Manager.new(h).start
 
+  if false # trueにすれば実行する
+    [:ring, :box].each do |shape|
+      [true, false].each do |opt_unite|
+        h = Add::Parameter.default
+        h[:row] = 3
+        h[:col] = 4
+        h[:dot_fill] = "blue"
+        h[:dot_shape] = shape
+        h[:dot_stroke_unite] = opt_unite
+        h[:output_filename] = "array-#{h[:row]}x#{h[:col]}-#{shape}-#{opt_unite ? '' : 'un'}united.png"
+        Add::Manager.new(h).start
+      end
+    end
+  end
+
   if false # trueにすれば実行する（時間がかかる）
-    [:circle, :ring, :rectangle, :box].each do |shape|
+    [:ring, :box, :circle, :square].each do |shape|
       h = Add::Parameter.default
       h[:row] = "1-10"
       h[:col] = "1-10"
