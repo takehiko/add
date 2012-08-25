@@ -83,11 +83,11 @@ module Add
           end
           @box_a << param
           x += @h[:dot_period] * col - @h[:dot_margin] + @h[:geo_margin]
-          x += @h[:grp_padding] * 2
+          x += @h[:grp_margin] * 2
           # x += @h[:dot_side] * col + @h[:dot_margin] * (col - 1) + @h[:geo_margin]
         end
         y += @h[:dot_period] * row - @h[:dot_margin] + @h[:geo_margin]
-        y += @h[:grp_padding] * 2
+        y += @h[:grp_margin] * 2
         # y += @h[:dot_side] * row + @h[:dot_margin] * (row - 1) + @h[:geo_margin]
       end
       image_width = x - @h[:geo_margin] + @h[:set_margin]
@@ -149,9 +149,11 @@ module Add
         if @h[:dot_shape] == :circle
           @h[:col].times do |j|
             @h[:row].times do |i|
-              x_o = @h[:dot_side] * 0.5 + @h[:dot_period] * j + (@h[:grp_strokewidth] + @h[:grp_padding] * 2)
+              x_o = @h[:dot_side] * 0.5 + @h[:dot_period] * j
+              x_o += (@h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding])
               # x_o = @h[:dot_side] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * j
-              y_o = @h[:dot_side] * 0.5 + @h[:dot_period] * i + (@h[:grp_strokewidth] + @h[:grp_padding] * 2)
+              y_o = @h[:dot_side] * 0.5 + @h[:dot_period] * i
+              y_o += (@h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding])
               # y_o = @h[:dot_side] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * i
               r = @h[:dot_side] * 0.5
               if @h[:dot_stroke] != :none && !@h[:dot_stroke_unite]
@@ -165,9 +167,10 @@ module Add
         elsif @h[:dot_shape] == :square
           @h[:col].times do |j|
             @h[:row].times do |i|
-#  + (@h[:grp_strokewidth] + @h[:grp_padding])
-              x_1 = @h[:dot_margin] * 0.5 + @h[:dot_period] * j + (@h[:grp_strokewidth] + @h[:grp_padding] * 2)
-              y_1 = @h[:dot_margin] * 0.5 + @h[:dot_period] * i + (@h[:grp_strokewidth] + @h[:grp_padding] * 2)
+              x_1 = @h[:dot_margin] * 0.5 + @h[:dot_period] * j
+              x_1 += @h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding]
+              y_1 = @h[:dot_margin] * 0.5 + @h[:dot_period] * i
+              y_1 += @h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding]
               x_2 = x_1 + @h[:dot_side]
               y_2 = y_1 + @h[:dot_side]
               # x_1 = @h[:dot_margin] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * j
@@ -199,10 +202,10 @@ module Add
             col_a += (0...@h[:col]).to_a
           end
           col_a.each do |c|
-            x_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5 + @h[:dot_period] * c + @h[:grp_padding]
+            x_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5 + @h[:dot_period] * c + @h[:grp_margin]
             y_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5
             x_2 = x_1 + @h[:dot_side] + @h[:grp_strokewidth]  + @h[:grp_padding] * 2
-            y_2 = y_1 + @h[:dot_period] * @h[:row] - (@h[:grp_strokewidth] + @h[:grp_padding]) + @h[:grp_padding] * 3
+            y_2 = y_1 + @h[:dot_period] * @h[:row] + @h[:grp_strokewidth] - @h[:grp_padding] * 2 + @h[:grp_margin] * 2
             command += " rectangle #{x_1},#{y_1} #{x_2},#{y_2}"
           end
 
@@ -211,14 +214,14 @@ module Add
           when /top/
             row_a << 0
           when /bot/
-            col_a << @h[:row] - 1
+            row_a << @h[:row] - 1
           when /row/
             row_a += (0...@h[:row]).to_a
           end
           row_a.each do |r|
             x_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5
-            y_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5 + @h[:dot_period] * r + @h[:grp_padding]
-            x_2 = x_1 + @h[:dot_period] * @h[:col] - (@h[:grp_strokewidth] + @h[:grp_padding]) + @h[:grp_padding] * 3
+            y_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5 + @h[:dot_period] * r + @h[:grp_margin]
+            x_2 = x_1 + @h[:dot_period] * @h[:col] + @h[:grp_strokewidth] - @h[:grp_padding] * 2 + @h[:grp_margin] * 2
             y_2 = y_1 + @h[:dot_side] + @h[:grp_strokewidth] + @h[:grp_padding] * 2
             command += " rectangle #{x_1},#{y_1} #{x_2},#{y_2}"
           end
@@ -274,6 +277,7 @@ module Add
         :grp_stroke => :none,      # 「グルーピング」のストローク色．値は:dot_fillと同じ
         :grp_strokewidth => 0,     # 「グルーピング」のストローク太さ
         :grp_padding => 0,         # 「グルーピング」の内部余白(幅・高さ共通)
+        :grp_margin => 0,          # 「グルーピング」の外部余白(幅・高さ共通)
       }
     end
 
@@ -306,7 +310,7 @@ if __FILE__ == $0
 
   if true # trueにすれば実行する
     shape = :ring
-    ["top", "left", "row", "col", "row+col"].each do |grp_area|
+    ["none", "top", "bot", "left", "right", "row", "col", "row+col"].each do |grp_area|
       h = Add::Parameter.default
       h[:row] = 3
       h[:col] = 4
@@ -315,8 +319,9 @@ if __FILE__ == $0
       h[:dot_stroke_unite] = false
       h[:grp_area] = grp_area
       h[:grp_stroke] = "black"
-      h[:grp_strokewidth] = h[:grp_padding] = 4
-      # h[:grp_strokewidth] = h[:grp_padding] = h[:dot_side] * 0.1
+      # h[:grp_strokewidth] = h[:grp_padding] = 4
+      h[:grp_strokewidth] = h[:grp_padding] = h[:dot_side] * 0.2
+      h[:grp_margin] = h[:grp_padding] * 2
       h[:output_filename] = "array-#{h[:row]}x#{h[:col]}-#{shape}-#{grp_area}.png"
       Add::Manager.new(h).start
     end
