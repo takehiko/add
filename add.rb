@@ -84,11 +84,9 @@ module Add
           @box_a << param
           x += @h[:dot_period] * col - @h[:dot_margin] + @h[:geo_margin]
           x += @h[:grp_margin] * 2
-          # x += @h[:dot_side] * col + @h[:dot_margin] * (col - 1) + @h[:geo_margin]
         end
         y += @h[:dot_period] * row - @h[:dot_margin] + @h[:geo_margin]
         y += @h[:grp_margin] * 2
-        # y += @h[:dot_side] * row + @h[:dot_margin] * (row - 1) + @h[:geo_margin]
       end
       image_width = x - @h[:geo_margin] + @h[:set_margin]
       image_height = y - @h[:geo_margin] + @h[:set_margin]
@@ -150,11 +148,9 @@ module Add
           @h[:col].times do |j|
             @h[:row].times do |i|
               x_o = @h[:dot_side] * 0.5 + @h[:dot_period] * j
-              x_o += (@h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding])
-              # x_o = @h[:dot_side] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * j
+              x_o += @h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding]
               y_o = @h[:dot_side] * 0.5 + @h[:dot_period] * i
-              y_o += (@h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding])
-              # y_o = @h[:dot_side] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * i
+              y_o += @h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding]
               r = @h[:dot_side] * 0.5
               if @h[:dot_stroke] != :none && !@h[:dot_stroke_unite]
                 r -= @h[:dot_strokewidth] * 0.5
@@ -173,10 +169,6 @@ module Add
               y_1 += @h[:grp_margin] + @h[:grp_strokewidth] + @h[:grp_padding]
               x_2 = x_1 + @h[:dot_side]
               y_2 = y_1 + @h[:dot_side]
-              # x_1 = @h[:dot_margin] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * j
-              # y_1 = @h[:dot_margin] * 0.5 + (@h[:dot_side] + @h[:dot_margin]) * i
-              # x_2 = x_1 + @h[:dot_side] - @h[:dot_margin]
-              # y_2 = y_1 + @h[:dot_side] - @h[:dot_margin]
               if @h[:dot_stroke] != :none && !@h[:dot_stroke_unite]
                 swh = @h[:dot_strokewidth] * 0.5
                 x_1 += swh
@@ -202,10 +194,10 @@ module Add
             col_a += (0...@h[:col]).to_a
           end
           col_a.each do |c|
-            x_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5 + @h[:dot_period] * c + @h[:grp_margin]
-            y_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5
+            x_1 = @h[:grp_strokewidth] * 0.5 + @h[:dot_period] * c + @h[:grp_margin]
+            y_1 = @h[:grp_strokewidth] * 0.5
             x_2 = x_1 + @h[:dot_side] + @h[:grp_strokewidth]  + @h[:grp_padding] * 2
-            y_2 = y_1 + @h[:dot_period] * @h[:row] + @h[:grp_strokewidth] - @h[:grp_padding] * 2 + @h[:grp_margin] * 2
+            y_2 = y_1 + @h[:dot_period] * @h[:row] + @h[:grp_strokewidth] - @h[:grp_padding] * 2 - @h[:dot_margin] + @h[:grp_margin] * 2
             command += " rectangle #{x_1},#{y_1} #{x_2},#{y_2}"
           end
 
@@ -219,9 +211,9 @@ module Add
             row_a += (0...@h[:row]).to_a
           end
           row_a.each do |r|
-            x_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5
-            y_1 = (@h[:dot_margin] + @h[:grp_strokewidth]) * 0.5 + @h[:dot_period] * r + @h[:grp_margin]
-            x_2 = x_1 + @h[:dot_period] * @h[:col] + @h[:grp_strokewidth] - @h[:grp_padding] * 2 + @h[:grp_margin] * 2
+            x_1 = @h[:grp_strokewidth] * 0.5
+            y_1 = @h[:grp_strokewidth] * 0.5 + @h[:dot_period] * r + @h[:grp_margin]
+            x_2 = x_1 + @h[:dot_period] * @h[:col] + @h[:grp_strokewidth] - @h[:grp_padding] * 2 - @h[:dot_margin] + @h[:grp_margin] * 2
             y_2 = y_1 + @h[:dot_side] + @h[:grp_strokewidth] + @h[:grp_padding] * 2
             command += " rectangle #{x_1},#{y_1} #{x_2},#{y_2}"
           end
@@ -308,7 +300,7 @@ if __FILE__ == $0
     end
   end
 
-  if true # trueにすれば実行する
+  if false # trueにすれば実行する
     shape = :ring
     ["none", "top", "bot", "left", "right", "row", "col", "row+col"].each do |grp_area|
       h = Add::Parameter.default
@@ -319,9 +311,9 @@ if __FILE__ == $0
       h[:dot_stroke_unite] = false
       h[:grp_area] = grp_area
       h[:grp_stroke] = "black"
-      # h[:grp_strokewidth] = h[:grp_padding] = 4
-      h[:grp_strokewidth] = h[:grp_padding] = h[:dot_side] * 0.2
-      h[:grp_margin] = h[:grp_padding] * 2
+      h[:grp_strokewidth] = h[:grp_padding] = h[:dot_side] * 0.1
+      h[:dot_margin] = h[:grp_padding] * 2
+      h[:grp_margin] = h[:grp_padding] * 3
       h[:output_filename] = "array-#{h[:row]}x#{h[:col]}-#{shape}-#{grp_area}.png"
       Add::Manager.new(h).start
     end
