@@ -4,7 +4,21 @@
 # "ruby 20120612.rb" makes all the images (PNG format) in the article:
 # http://d.hatena.ne.jp/takehikom/20120612/1339436326
 
-require "./add.rb"
+def require_ancestor(s)
+  d = File.dirname(File.expand_path(__FILE__))
+  3.times do |i|
+    f = "#{d}/#{s}"
+    if test(?f, f)
+      puts "require \"#{f}\"" if $DEBUG
+      require f
+      return true
+    end
+    d = File.dirname(d)
+  end
+  return false
+end
+require_ancestor "add.rb"
+# require "add.rb"
 
 def my_system(command)
   puts command
