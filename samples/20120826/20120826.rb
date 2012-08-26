@@ -1,7 +1,21 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-require "./add.rb"
+def require_ancestor(s)
+  d = File.dirname(File.expand_path(__FILE__))
+  3.times do |i|
+    f = "#{d}/#{s}"
+    if test(?f, f)
+      puts "require \"#{f}\"" if $DEBUG
+      require f
+      return true
+    end
+    d = File.dirname(d)
+  end
+  return false
+end
+require_ancestor "add.rb"
+# require "./add.rb"
 
 ["none", "row", "row+col"].each do |grp_area|
   h = Add::Parameter.default
