@@ -181,7 +181,12 @@ module Add
           end
         end
 
+        command += "\""
+
         if !@h[:grp_area].empty?
+          command += " -strokewidth #{@h[:grp_strokewidth]}"
+          command += " -draw \""
+          command += "translate #{trans_x} #{trans_y}"
           command += " fill none stroke #{@h[:grp_stroke]}"
 
           col_a = []
@@ -217,9 +222,9 @@ module Add
             y_2 = y_1 + @h[:dot_side] + @h[:grp_strokewidth] + @h[:grp_padding] * 2
             command += " rectangle #{x_1},#{y_1} #{x_2},#{y_2}"
           end
-        end
 
-        command += "\""
+          command += "\""
+        end
 
         command
       end
